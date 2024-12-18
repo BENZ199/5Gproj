@@ -13,7 +13,10 @@ gnodeb:
   slicesupportlist:
     sst: "01"
     sd: "000001"
-
+  gtpif:
+    name: "gtp1"  # Set the name of the GTP interface, e.g., gtp0, gtp1
+    ip: "10.45.0.2"  # GTP interface IP (choose an unused IP in your subnet)
+    mtu: 1500  # Set the MTU size for the GTP interface, typically 1500
 ue:
   msin: "1234567891"
   key: "00000000000000000000000000000000"

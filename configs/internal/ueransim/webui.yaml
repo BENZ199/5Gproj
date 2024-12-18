@@ -1,0 +1,16 @@
+server:
+  address: "0.0.0.0"        # Listen on all available network interfaces
+  port: 3000                # Port number for the WebUI
+
+database:
+  uri: mongodb://open5gs:open5gs@db:27017/open5gs  # Updated URI with authentication
+  name: open5gs
+
+logging:
+  level: "info"             # Logging level
+  file: "/var/log/webui.log"  # Optional: Log file location
+
+auth:
+  enabled: true             # Enable or disable authentication
+  secret: "your_secret_key"  # Change to a secure value for production use
+

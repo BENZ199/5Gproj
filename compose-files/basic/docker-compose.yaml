@@ -13,6 +13,32 @@ services:
     ports:
       - "0.0.0.0:27017:27017/tcp"
 
+  webui:
+    container_name: webui
+    build:
+      context: ../../images/webui
+      args:
+        - OPEN5GS_VERSION=${OPEN5GS_VERSION}
+        - NODE_VERSION=${NODE_VERSION}
+    image: "webui:${OPEN5GS_VERSION}"
+    ports:
+      - "3000:9999"  # Map the host port to the container's port
+    environment:
+      - DB_URI=mongodb://db:27017/open5gs
+      - HOSTNAME=0.0.0.0
+      - PORT=9999
+      - NODE_ENV=dev
+    volumes:
+      - ./configs/basic/webui.yaml:/usr/local/src/webui/config/webui.yaml  # Mount the webui.yaml configuration
+    networks:
+      open5gs:
+        aliases:
+          - webui.open5gs.org
+    depends_on:
+      - db
+
+
+
   nrf:
     container_name: nrf
     image: "nrf:${OPEN5GS_VERSION}"
@@ -212,7 +238,6 @@ services:
     privileged: true
     cap_add:
       - NET_ADMIN
-
 networks:
   open5gs:
     name: open5gs

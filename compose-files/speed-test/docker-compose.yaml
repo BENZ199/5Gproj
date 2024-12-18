@@ -13,6 +13,30 @@ services:
     ports:
       - "0.0.0.0:27017:27017/tcp"
 
+  webui:
+      container_name: webui
+      build:
+        context: ../../images/webui
+        args:
+          - OPEN5GS_VERSION=${OPEN5GS_VERSION}
+          - NODE_VERSION=${NODE_VERSION}
+      image: "webui:${OPEN5GS_VERSION}"
+      ports:
+        - "3000:9999"  # Map the host port to the container's port
+      environment:
+        - DB_URI=mongodb://db:27017/open5gs
+        - HOSTNAME=0.0.0.0
+        - PORT=9999
+        - NODE_ENV=dev
+      volumes:
+        - ./configs/speed-test/webui.yaml:/usr/local/src/webui/config/webui.yaml  # Mount the webui.yaml configuration
+      networks:
+        open5gs:
+          aliases:
+            - webui.open5gs.org
+      depends_on:
+        - db
+
   nrf:
     container_name: nrf
     image: "nrf:${OPEN5GS_VERSION}"
@@ -206,10 +230,11 @@ services:
     privileged: true
     cap_add:
       - NET_ADMIN
+      - SYS_ADMIN
 
   packetrusher:
     container_name: packetrusher
-    image: "ghcr.io/borjis131/packetrusher:main"
+    image: "packetrusher:main"
     command: "--config /PacketRusher/config/packetrusher.yaml ue"
     networks:
       open5gs:
@@ -220,10 +245,15 @@ services:
         target: /PacketRusher/config/packetrusher.yaml
     privileged: true
     cap_add:
+      - NET_ADMIN   # Required for creating and managing network interfaces
+      - SYS_MODULE  # Needed to load kernel modules like 'gtp'
       - ALL
+      - SYS_ADMIN
+    volumes:
+      - /lib/modules:/lib/modules 
+      - /dev/net/tun:/dev/net/tun
     depends_on:
       - amf
-
   iperf:
     container_name: iperf
     image: "mlabbe/iperf3:latest"
